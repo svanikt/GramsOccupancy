@@ -86,7 +86,7 @@
     <!-- The PDG (Particle Data Group) code of the primary
          particles. For a sky simulation, that will almost certainly
          be 22 (photon). -->
-    <option name="PrimaryPDG" value="22" type="integer" desc="primary particle PDG code"/>    
+    <option name="PrimaryPDG" value="2112" type="integer" desc="primary particle PDG code"/>    
     
     <!-- PositionGeneration = how to generate the primary particle
          positions. The following are allowed values:

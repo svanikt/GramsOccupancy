@@ -1,0 +1,17 @@
+# Data files and simulation outputs
+*.root
+*.pkl
+*.hepmc3
+*.fits
+
+# Generated data directories
+*_maps/
+
+# Third-party tools (keep outside repo)
+expacs_share/
+parma_cpp/
+
+# Python artifacts
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
