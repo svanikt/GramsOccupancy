@@ -11,10 +11,19 @@ import os
 # =============================================================================
 # Directory and File Paths
 # =============================================================================
-BASE_DIR = "/nevis/tehanu/data/st3624/software/GRAMS/GramsOccupancy"
-GS_DIR = "/nevis/tehanu/data/st3624/software/GRAMS/GramsSim-work"
-PARMA_DIR = "/nevis/tehanu/data/st3624/software/GRAMS/parma/parma_cpp"
-EXPACS_DIR = "/nevis/tehanu/data/st3624/software/GRAMS/parma/expacs_share"
+# base directories for GramsOccupancy and GramsSim
+BASE_DIR = "/nevis/wanaka/share/standon/GRAMS/GramsOccupancy"
+GS_DIR = "/nevis/wanaka/share/standon/GRAMS/GramsSim-work"
+
+# directory to store simulation outputs
+DATA_DIR = "/nevis/wanaka/data/standon/GramsOccupancy"
+
+# directory for PARMA/EXPACS simulations
+PARMA_DIR = "/nevis/wanaka/share/standon/GRAMS/parma/parma_cpp"
+EXPACS_DIR = "/nevis/wanaka/share/standon/GRAMS/parma/expacs_share"
+
+# directory for pre-generated light maps
+LIGHTMAP_DIR = "/nevis/riverside/share/seligman/grams/GramsG4-build"
 
 # options file for GramsSim
 OPTIONS_FILE = os.path.join(BASE_DIR, "occupancy_grams.xml")
@@ -81,7 +90,7 @@ loc_name = LOCATION_NAMES.get(LOCATION, LOCATION)
 FLUX_CSV = os.path.join(EXPACS_DIR, "parma_cpp_edit", "AngOutCsv", f"{loc_name}_{DATE}_alt{ALTITUDE_M}m.csv")
 
 # output directory for maps and simulation data
-MAPS_DIR = os.path.join(BASE_DIR, f"data/{LOCATION}_{DATE}_maps")
+MAPS_DIR = os.path.join(DATA_DIR, f"{LOCATION}_{DATE}_maps")
 
 # =============================================================================
 # Helper Functions

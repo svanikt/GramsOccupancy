@@ -193,7 +193,7 @@
          bands are limited to between EnergyMin and EnergyMax defined
          above.-->
     <option name="MapEnergyBandsFile" type="string"
-	    value="/nevis/tehanu/data/st3624/software/GRAMS/GramsOccupancy/tucson_2025_8_31_maps/tucson_2025_8_31_photon.fits"
+	    value="/nevis/wanaka/data/standon/GramsOccupancy/tucson_2025_8_31_maps/tucson_2025_8_31_photon.fits"
 	    desc="FITS file with HEALPix energy maps"/>    
     <!-- HDU for energy maps in the above file.  It may only apply to file
          AliceSprings_Australia_2021_3_21_alt30000m_map_photon.fits
@@ -592,7 +592,7 @@
 
   <gramselecsim>
 
-    <!-- GramsElecSim take two files as input. One contains the lists
+    <!-- gramselecsim take two files as input. One contains the lists
          of electron clusters for each event. The other contains a map
          of which clusters are associated with which readout cells.
     -->
@@ -683,7 +683,7 @@
     <option name="voxelParticleType" value="opticalphoton" type="string" desc="type of particle to generate" />
 
     <!-- The energy of the particle to generate in eV. This value here
-         corresponds to 127nm, the average energy between fast and
+         corresponds to 127nm, the average wavelength between fast and
          slow scintillation light in liquid argon. -->
     <option name="voxelParticleEnergy" value="9.76" type="float" desc="energy of the particle [eV]" />
 
@@ -694,7 +694,7 @@
 
          Units are the value of "TimeUnit" near the top of this file.
     -->
-    <option name="voxelTimeBin" value="1" type="float" desc="time bin for light map" />
+    <option name="voxelTimeBin" value="0.5" type="float" desc="time bin for light map" />
     
     <!-- The file that contains the GDML description of the detector 
 	 This should be the same as "gdmlfile" used by GramsG4.
@@ -731,10 +731,11 @@
          following two parameters define the first and last voxel for
          which a light map will be generated during this run.
 
-         The number scheme follows the usual array indexing convention:
-	 [startVoxel,endVoxel), that is endVoxel is the number _after_ the
-	 last voxel to be processed. For example:
-	 startVoxel=0, endVoxel=100 will simulate the first 100 voxels,
+	 In this number scheme, the voxels are numbered from 0 to NV-1; that is,
+	 given that the total number of voxels in the volume is NV, we'll
+	 want to eventually simulation all voxels from 0 to NV-1. 
+	 For example:
+	 startVoxel=0, endVoxel=99 will simulate the first 100 voxels,
                from 0 to 99
          startVoxel=0, endVoxel=NV-1 (where NV is defined above) will simulate
                all the voxels in "voxelVolume" as defined above. 
@@ -746,8 +747,8 @@
          of precision. That may be overkill, but if we have to generate light maps
          for a detector ~100cm on an edge down to 0.1mm precision, we're covered.
     -->
-    <option name="startVoxel" short="s" value="0" type="integer" desc="start voxel for this run" />
-    <option name="endVoxel" short="l" value="1" type="integer" desc="end voxel for this run" />
+    <option name="startVoxel" value="0" type="integer" desc="start voxel for this run" />
+    <option name="endVoxel" value="1" type="integer" desc="end voxel for this run" />
     
     <!-- The name of the output file that will contain the
          OpDetLightMap objects created by this simulation. 
@@ -821,5 +822,82 @@
     <option name="outputOpticalSimTree" value="OpticalPhotons" type="string" desc="output ntuple"/>
 
   </opticalsim>
+
+  <opdetsim>
+
+    <!-- Input ROOT file from OpticalSim. -->
+    <option name="inputOpDetSimFile" short="i" value="opticalsim.root" type="string" 
+        desc="input optical simulations file"/>    
+
+    <!-- Name of the tree in the input file that contains the number
+         of optical photons arriving at each optical detector. -->
+    <option name="inputOpDetSimTree" value="OpticalPhotons" type="string" desc="input optical photons tree"/>
+
+    <!-- Output ROOT file -->
+    <option name="outputOpDetSimFile" short="o" value="opdetsim.root" type="string"
+        desc="output file"/>
+    <option name="outputOpDetSimTree" value="OpDetSim" type="string" desc="output tree"/>
+ 
+    <!-- 
+         IMPORTANT: Note that the units associated with these
+         constants should be consistent with the "TimeUnit",
+         "LengthUnit", and "EnergyUnit" options defined above.
+    -->
+
+    <!-- The general processing for opdetsim comes from
+         gramselecsim. The parameters below are the same as those from
+         gramselecsim, but with a prefix of 'op_' to keep the option
+         name unique.
+
+	 Note that the _values_ of the parameters don't have to be the
+	 same as those of gramselecsim; opdetsim uses the same
+	 functional forms, but the electronics readout for the optical
+	 detectors doesn't have to be the same as for the TPC
+	 readout.-->
+    
+    <!-- general information -->
+    <option name="op_timebin_width"        value="10.0"     type="double" desc="time bin width in this framework"/>
+    <option name="op_time_window"          value="200000.0" type="double" desc="sampling width"/>
+
+    <!-- Preamp -->
+    <!-- Valid values of preamp_func are:
+    0 = Gaussian normalized to unit probability
+    1 = Gaussian
+    2 = Log of normalized gaussian
+    3 = Log of gaussian
+    4 = Double exponential
+    -->
+    <option name="op_preamp_func"          value="5"       type="int"    desc="curve type of preamp output"/>
+    <option name="op_preamp_prior_time"    value="0.0"     type="double" desc="rise time"/>
+    <option name="op_preamp_post_time"     value="35000.0" type="double" desc="decay time"/>
+    <option name="op_peak_delay"           value="0.0"     type="double" desc="delay time from e-"/>
+    <option name="op_preamp_mu"            value="1500.0"  type="double" desc="sampling width"/>
+    <option name="op_preamp_sigma"         value="400.0"   type="double" desc="sampling width"/>
+    <option name="op_preamp_tau1"          value="100.0"   type="double" desc="tau1 in two exp model"/>
+    <option name="op_preamp_tau2"          value="500.0"   type="double" desc="tau2 in two exp model"/>
+    <option name="op_preamp_gain"          value="31250"   type="double" desc="photonelecton->voltage [mV/fC]"/>
+    <option name="op_preamp_amp"           value="1236.25" type="double" desc="semi-Gauss model amplitude"/>
+    <option name="op_preamp_tp"            value="9163.78" type="double" desc="semi-Gauss model peaking time [ns]"/>
+    <option name="op_preamp_A0"            value="8.62801" type="double" desc="semi-Gauss model shaping term A0"/>
+    <option name="op_preamp_A1"            value="1.96116" type="double" desc="semi-Gauss model shaping term A1"/>
+    <option name="op_preamp_W1"            value="1.02976" type="double" desc="semi-Gauss model shaping term W1"/>
+
+    <!-- add noise -->
+    <option name="op_noise_param0"     value="0.0"     type="double" desc="0th order"/>
+    <option name="op_noise_param1"     value="0.0"     type="double" desc="1st order"/>
+    <option name="op_noise_param2"     value="0.0"     type="double" desc="2nd order"/>
+
+    <!-- AD converter -->
+    <option name="op_bit_resolution"   value="12"      type="int"      desc="resolution of ADC [bit]"/>
+    <option name="op_input_min"        value="0.0"     type="double"   desc="minimum input of ADC [mV]"/>
+    <option name="op_input_max"        value="1500.0"  type="double"   desc="maximum input of ADC [mV]"/>
+    <option name="op_sample_freq"      value="2.0"     type="double"   desc="sampling frequency of ADC [MHz]"/>
+
+    <!-- OpDet parameters - these are unique to opdetsim -->
+
+    <!-- Be mindful of this option. See OPDETSIM.md for details. -->
+    <option name="op_pe_efficiency"    value="1.0"     type="double"   desc="efficiency for PE conversion" />
+
+  </opdetsim>
   
 </parameters>

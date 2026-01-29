@@ -24,12 +24,12 @@ import subprocess
 
 from config import (
     PARTICLE_DICT, OPTIONS_FILE, GS_DIR, NUM_EVENTS,
-    LOCATION, DATE, MAPS_DIR,
+    LOCATION, DATE, MAPS_DIR, LIGHTMAP_DIR,
     ensure_dirs
 )
 
 # simulation stages in order
-SIM_STAGES = ['gramssky', 'gramsg4', 'gramsdetsim', 'gramsreadoutsim', 'gramselecsim']
+SIM_STAGES = ['gramssky', 'gramsg4', 'gramsdetsim', 'gramsreadoutsim', 'gramselecsim', 'opticalsim', 'opdetsim']
 
 def run_stage(exe, options_file, args_list):
     """Run a GramsSim stage with given arguments."""
@@ -52,6 +52,8 @@ def get_file_paths(sim_dir, prefix):
         'detsim': os.path.join(sim_dir, f"{prefix}_detsim.root"),
         'readoutsim': os.path.join(sim_dir, f"{prefix}_readoutsim.root"),
         'elecsim': os.path.join(sim_dir, f"{prefix}_elecsim.root"),
+        'opticalsim': os.path.join(sim_dir, f"{prefix}_opticalsim.root"),
+        'opdetsim': os.path.join(sim_dir, f"{prefix}_opdetsim.root")
     }
 
 
@@ -107,6 +109,23 @@ def run_particle_sim(particle, fits_file, sim_dir, options_file, num_events,
             args = ["-i", paths['detsim'], "-m", paths['readoutsim'], "-o", paths['elecsim']]
             print(f"  [{stage}] -> {os.path.basename(paths['elecsim'])}")
 
+        elif stage == 'opticalsim':
+            if not os.path.exists(paths['g4']):
+                print(f"  [ERROR] G4 file not found: {paths['g4']}")
+                return False
+            if not os.path.exists(LIGHTMAP_DIR):
+                print(f"  [ERROR] Lightmap directory not found: {LIGHTMAP_DIR}")
+                return False
+            args = ["-i", paths['g4'], "-m", os.path.join(LIGHTMAP_DIR, "lightmap*.root"), "-o", paths['opticalsim']]
+            print(f"  [{stage}] -> {os.path.basename(paths['opticalsim'])}")
+
+        elif stage == 'opdetsim':
+            if not os.path.exists(paths['opticalsim']):
+                print(f"  [ERROR] OpticalSim file not found: {paths['opticalsim']}")
+                return False
+            args = ["-i", paths['opticalsim'], "-o", paths['opdetsim']]
+            print(f"  [{stage}] -> {os.path.basename(paths['opdetsim'])}")
+
         else:
             print(f"  [SKIP] Unknown stage: {stage}")
             continue
@@ -125,8 +144,8 @@ def main():
     parser.add_argument("--options", type=str, default=OPTIONS_FILE, help="GramsSim options XML file")
     parser.add_argument("--start-from", type=str, default="gramssky", choices=SIM_STAGES,
                         help="Start from this stage (default: gramssky)")
-    parser.add_argument("--stop-after", type=str, default="gramselecsim", choices=SIM_STAGES,
-                        help="Stop after this stage (default: gramselecsim)")
+    parser.add_argument("--stop-after", type=str, default="opdetsim", choices=SIM_STAGES,
+                        help="Stop after this stage (default: opdetsim)")
     args = parser.parse_args()
 
     ensure_dirs(MAPS_DIR)
